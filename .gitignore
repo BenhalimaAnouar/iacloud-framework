@@ -23,3 +23,11 @@ Thumbs.db
 
 # Java
 *.class
+
+# ==========================================
+# IA-Cloud Configuration
+# ==========================================
+conf.properties
+
+# Keep only the example configuration
+!conf.properties.example
