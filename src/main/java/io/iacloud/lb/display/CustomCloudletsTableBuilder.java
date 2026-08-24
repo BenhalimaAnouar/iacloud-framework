@@ -11,7 +11,9 @@ import org.cloudsimplus.builders.tables.TableColumn;
 import org.cloudsimplus.cloudlets.Cloudlet;
 
 /**
- * @author aaaaa
+ * @author Ben Halima Anouar
+* @version 1.0.0
+ * @since 1.0
  */
 public class CustomCloudletsTableBuilder extends CloudletsTableBuilder {
 

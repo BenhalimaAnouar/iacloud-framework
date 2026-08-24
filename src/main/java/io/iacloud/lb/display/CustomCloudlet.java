@@ -7,7 +7,9 @@ package io.iacloud.lb.display;
 import org.cloudsimplus.cloudlets.CloudletSimple;
 
 /**
- * @author aaaaa
+ * @author Ben Halima Anouar
+* @version 1.0.0
+ * @since 1.0
  */
 public class CustomCloudlet extends CloudletSimple {
 

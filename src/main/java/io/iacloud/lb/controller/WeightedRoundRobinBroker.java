@@ -9,7 +9,9 @@ import org.cloudsimplus.cloudlets.Cloudlet;
 import org.cloudsimplus.vms.Vm;
 
 /**
- * @author aaaaa
+ * @author Ben Halima Anouar
+* @version 1.0.0
+ * @since 1.0
  */
 public class WeightedRoundRobinBroker implements VmSelectionPolicy {
 
