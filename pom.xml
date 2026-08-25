@@ -5,6 +5,68 @@
     <artifactId>ia-cloud</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
+    <name>IA-Cloud Adaptive Load Balancing Framework</name>
+
+<description>
+An AI-driven adaptive load balancing framework for CloudSim Plus.
+The framework automatically predicts and dynamically adapts
+load balancing algorithms based on Quality of Service (QoS)
+requirements using the IA-Cloud Prediction Platform.
+</description>
+
+<url>
+https://github.com/BenhalimaAnouar/iacloud-framework
+</url>
+<organization>
+
+    <name>IA-Cloud Team</name>
+
+    <url>https://iacloudac.ma/</url>
+
+</organization>
+
+
+<developers>
+
+    <developer>
+
+        <id>benhalimaanouar</id>
+
+        <name>Ben Halima Anouar</name>
+
+        <email>benhalimaanouar@gmail.com</email>
+
+        <organization>IA-Cloud Team</organization>
+
+        <roles>
+
+            <role>Founder</role>
+
+            <role>Developer</role>
+
+            <role>Researcher</role>
+
+        </roles>
+
+    </developer>
+
+</developers>
+<licenses>
+
+    <license>
+
+        <name>Apache License 2.0</name>
+
+        <url>
+https://github.com/BenhalimaAnouar/iacloud-framework/blob/main/LICENSE
+        </url>
+
+    </license>
+
+</licenses>
+
+
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>24</maven.compiler.source>
@@ -25,4 +87,48 @@
          <type>jar</type>
       </dependency>
    </dependencies>
+   
+   <build>
+
+    <plugins>
+
+        <plugin>
+
+            <groupId>org.apache.maven.plugins</groupId>
+
+            <artifactId>maven-compiler-plugin</artifactId>
+
+            <version>3.14.0</version>
+
+            <configuration>
+
+                <release>21</release>
+
+            </configuration>
+
+        </plugin>
+
+        <plugin>
+
+            <groupId>org.apache.maven.plugins</groupId>
+
+            <artifactId>maven-javadoc-plugin</artifactId>
+
+            <version>3.12.0</version>
+
+            <configuration>
+
+                <failOnError>false</failOnError>
+
+                <detectOfflineLinks>false</detectOfflineLinks>
+
+            </configuration>
+
+        </plugin>
+
+    </plugins>
+
+</build>
+   
+   
 </project>
