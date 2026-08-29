@@ -1,3 +1,4 @@
+![Academic Use Only](https://img.shields.io/badge/License-Academic%20Use%20Only-blue)
 # Adaptive Load Balancing Strategies in CloudSim Plus
 
 ## 📌 Overview
@@ -504,8 +505,21 @@ Contributions are welcome for:
 ---
 
 ## 📜 License
+The IA-Cloud Adaptive Load Balancing Framework is freely available for:
 
-MIT License
+- ✅ Academic research
+- ✅ Universities
+- ✅ Students
+- ✅ Educational institutions
+- ✅ Scientific publications
+
+Commercial use is **not permitted** without obtaining a commercial license from the copyright holder.
+
+For commercial licensing, please contact:
+
+📧 benhalimaanouar@gmail.com
+
+🌐 https://iacloudac.ma
 
 ---
 
