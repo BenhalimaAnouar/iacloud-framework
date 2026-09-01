@@ -1,4 +1,10 @@
-![Academic Use Only](https://img.shields.io/badge/License-Academic%20Use%20Only-blue)
+# IA-Cloud Adaptive Load Balancing Framework
+
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+![Java](https://img.shields.io/badge/Java-21+-orange)
+![CloudSim Plus](https://img.shields.io/badge/CloudSim%20Plus-9.x-green)
+![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+![Academic API](https://img.shields.io/badge/Hosted%20API-Free%20for%20Academic%20Use-success)
 # Adaptive Load Balancing Strategies in CloudSim Plus
 
 ## 📌 Overview
