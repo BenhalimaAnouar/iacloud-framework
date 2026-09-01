@@ -505,14 +505,27 @@ Contributions are welcome for:
 ---
 
 ## 📜 License
-The IA-Cloud Adaptive Load Balancing Framework is freely available for:
 
-- ✅ Academic research
-- ✅ Universities
-- ✅ Students
-- ✅ Educational institutions
-- ✅ Scientific publications
 
+The IA-Cloud Adaptive Load Balancing Framework is released as open-source software under the Apache License 2.0.
+
+The framework can be freely used, modified and redistributed according to the terms of the license.
+
+---
+
+## IA-Cloud Prediction Service
+
+The AI prediction service available at
+
+https://iacloudac.ma
+
+is a hosted service and is **not** part of this repository.
+
+Access to the prediction service requires an IA-Cloud API Key.
+
+Academic users (students, researchers, universities and research laboratories) may request free API access for non-commercial research and educational purposes.
+
+Commercial organizations must obtain an appropriate commercial subscription or license before using the hosted prediction service.
 Commercial use is **not permitted** without obtaining a commercial license from the copyright holder.
 
 For commercial licensing, please contact:
