@@ -5,13 +5,13 @@ The AdaptiveBroker extends the default CloudSim Plus broker.
 ## Constructor
 
 ```java
-AdaptiveBroker();
+AdaptiveBroker(simulation,null);
 ```
 
 Automatic prediction.
 
 ```java
-AdaptiveBroker("RoundRobin");
+AdaptiveBroker(simulation,new RoundRobinBroker());
 ```
 
 Manual policy.
@@ -22,7 +22,7 @@ Manual policy.
 
 ```java
 AdaptiveBroker broker =
-        new AdaptiveBroker();
+        new AdaptiveBroker((simulation,null);
 ```
 
 ---
