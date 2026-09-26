@@ -88,47 +88,50 @@ https://github.com/BenhalimaAnouar/iacloud-framework/blob/main/LICENSE
       </dependency>
    </dependencies>
    
-   <build>
-
+  <build>
     <plugins>
 
         <plugin>
-
             <groupId>org.apache.maven.plugins</groupId>
-
             <artifactId>maven-compiler-plugin</artifactId>
-
             <version>3.14.0</version>
-
             <configuration>
-
                 <release>21</release>
-
             </configuration>
-
         </plugin>
 
         <plugin>
-
             <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.6.0</version>
 
-            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
 
-            <version>3.12.0</version>
+                    <configuration>
 
-            <configuration>
+                        <createDependencyReducedPom>false</createDependencyReducedPom>
 
-                <failOnError>false</failOnError>
+                    </configuration>
 
-                <detectOfflineLinks>false</detectOfflineLinks>
-
-            </configuration>
+                </execution>
+            </executions>
 
         </plugin>
 
     </plugins>
-
 </build>
+<distributionManagement>
+    <repository>
+        <id>github</id>
+        <name>GitHub Packages</name>
+        <url>https://maven.pkg.github.com/BenhalimaAnouar/iacloud-framework</url>
+    </repository>
+</distributionManagement>
    
    
 </project>

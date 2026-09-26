@@ -270,8 +270,12 @@ public class AdaptiveBroker extends DatacenterBrokerSimple {
                     "Prediction result not found.");
         }
 
-        this.policy = LoadBalancerFactory.getFactoryPolicy(
-                IaCloudApi.getOptimizedAlgorithmAsNumber());
+        //this.policy = LoadBalancerFactory.getFactoryPolicy(
+                //IaCloudApi.getOptimizedAlgorithmAsNumber());
+        this.policy =
+    LoadBalancerFactory.create(
+            response.get("result").getAsString()
+    );
 
         if (this.policy == null) {
 
@@ -283,14 +287,19 @@ public class AdaptiveBroker extends DatacenterBrokerSimple {
 
 
 
-      
+
 
 
        System.out.println(
                   "Init Policy based on your configuration  :"
                       + IaCloudApi.getOptimizedAlgorithm().get("result"));
-      this.policy =
-          LoadBalancerFactory.getFactoryPolicy(IaCloudApi.getOptimizedAlgorithmAsNumber());
+      //this.policy =
+          //LoadBalancerFactory.getFactoryPolicy(IaCloudApi.getOptimizedAlgorithmAsNumber());
+
+    this.policy =
+        LoadBalancerFactory.create(
+                response.get("result").getAsString()
+        );
 
 
       try {
@@ -513,18 +522,20 @@ public class AdaptiveBroker extends DatacenterBrokerSimple {
               // System.out.println("Changing To  :"+
               // IaCloudApi.getOptimizedAlgorithm().get("result"));
               IaCloudApi.init();
-              setPolicy(
-                  LoadBalancerFactory.getFactoryPolicy(IaCloudApi.getOptimizedAlgorithmAsNumber()));
+              JsonObject newResponse = IaCloudApi.getOptimizedAlgorithm();
+              String newPolicyName = newResponse.get("result").getAsString();
 
+              //setPolicy(
+                //  LoadBalancerFactory.getFactoryPolicy(IaCloudApi.getOptimizedAlgorithmAsNumber()));
+              setPolicy(LoadBalancerFactory.create(newPolicyName));
               List<Cloudlet> unfinished = resendUnfinishedCloudlets();
 
               for (Cloudlet c : unfinished) {
                 if (c instanceof CustomCloudlet) {
-                  ((CustomCloudlet) c)
-                      .setPolicy(
-                          LoadBalancerFactory.getFactoryPolicy(
-                                  IaCloudApi.getOptimizedAlgorithmAsNumber())
-                              .toString());
+
+
+                  ((CustomCloudlet) c).setPolicy(newPolicyName);
+
                 }
               }
 

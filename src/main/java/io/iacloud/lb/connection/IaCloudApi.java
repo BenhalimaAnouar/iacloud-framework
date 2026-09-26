@@ -77,7 +77,7 @@ public class IaCloudApi {
      // System.err.println("Test "+optimizedAlgorithm);
 
     String policy = optimizedAlgorithm.get("result").getAsString();
-
+    /*
     switch (policy) {
       case "DynamicRR":
         return LoadBalancingPolicy.DYNAMIC_ROUND_ROBIN;
@@ -102,7 +102,8 @@ public class IaCloudApi {
 
       default:
         return 0;
-    }
+    }*/
+return 0;
   }
 
   public static void setOptimizedAlgorithm(JsonObject optimizedAlgorithm) {

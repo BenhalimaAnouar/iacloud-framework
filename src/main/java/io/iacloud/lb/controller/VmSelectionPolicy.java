@@ -15,5 +15,12 @@ import org.cloudsimplus.vms.Vm;
  */
 public interface VmSelectionPolicy {
 
+ /**
+     * Selects the most suitable VM for the given Cloudlet.
+     *
+     * @param cloudlet the Cloudlet that needs to be assigned
+     * @param vmList the list of available VMs
+     * @return the selected VM
+     */
   Vm selectVmForCloudlet(Cloudlet cloudlet, List<Vm> vmList);
 }
