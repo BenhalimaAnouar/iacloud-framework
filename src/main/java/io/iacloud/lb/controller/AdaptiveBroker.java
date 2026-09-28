@@ -204,6 +204,56 @@ public class AdaptiveBroker extends DatacenterBrokerSimple {
     RESPONSE_TIME_THRESHOLD = responseTime;
   }
 
+
+/**
+ * Creates a VM selection policy from an IA-Cloud API response.
+ *
+ * @param response IA-Cloud JSON response
+ * @return selected VM selection policy
+ */
+private VmSelectionPolicy createPolicyFromResponse(JsonObject response) {
+
+    if (response == null) {
+        throw new IaCloudException(
+                "No response received from IA-Cloud."
+        );
+    }
+
+    if (!response.has("success")) {
+        throw new IaCloudException(
+                "Invalid response received from IA-Cloud."
+        );
+    }
+
+    if (!response.get("success").getAsBoolean()) {
+
+        String message = response.has("message")
+                ? response.get("message").getAsString()
+                : "Unknown IA-Cloud error.";
+
+        throw new IaCloudException(message);
+    }
+
+    if (!response.has("result")) {
+        throw new IaCloudException(
+                "Prediction result not found."
+        );
+    }
+
+    String policyName = response.get("result").getAsString();
+
+    if (!LoadBalancerFactory.exists(policyName)) {
+        throw new IaCloudException(
+                "Unsupported load balancing policy: " + policyName
+                        + ". Registered policies: "
+                        + LoadBalancerFactory.getRegisteredPolicyNames()
+        );
+    }
+
+    return LoadBalancerFactory.create(policyName);
+}
+
+
   /**
    * Constructs an {@code AdaptiveBroker} instance with a given simulation and an initial VM
    * selection policy.
@@ -270,12 +320,8 @@ public class AdaptiveBroker extends DatacenterBrokerSimple {
                     "Prediction result not found.");
         }
 
-        //this.policy = LoadBalancerFactory.getFactoryPolicy(
-                //IaCloudApi.getOptimizedAlgorithmAsNumber());
-        this.policy =
-    LoadBalancerFactory.create(
-            response.get("result").getAsString()
-    );
+
+         this.policy = createPolicyFromResponse(response);
 
         if (this.policy == null) {
 
@@ -293,13 +339,7 @@ public class AdaptiveBroker extends DatacenterBrokerSimple {
        System.out.println(
                   "Init Policy based on your configuration  :"
                       + IaCloudApi.getOptimizedAlgorithm().get("result"));
-      //this.policy =
-          //LoadBalancerFactory.getFactoryPolicy(IaCloudApi.getOptimizedAlgorithmAsNumber());
 
-    this.policy =
-        LoadBalancerFactory.create(
-                response.get("result").getAsString()
-        );
 
 
       try {

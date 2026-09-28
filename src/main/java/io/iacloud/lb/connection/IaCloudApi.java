@@ -1,237 +1,417 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
-
-* IaCloud is the class that connect to the sever model LLM Via HTTP/HTTPS
-and return the outcaomes of optimized algorithm depending on initial
-confic or the config during the time
-
-
-* Typical usage:
- * <pre>{@code
- * ConfigManager config = new ConfigManager("config.properties");
- * double deadline = config.getDouble("deadline", 10);
- * boolean debugMode = config.getBoolean("debug");
- * }</pre>
- *
- * @author Ben Halima Anouar
- * @version 1.0
- *
-
- */
 package io.iacloud.lb.connection;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.iacloud.lb.factory.ConfigManager;
 import io.iacloud.lb.factory.LoadBalancingPolicy;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * IaCloudApi connects the IA-Cloud framework to the deployed IA-Cloud
+ * prediction model using HTTP/HTTPS.
+ *
+ * <p>The class loads QoS requirements from {@code config.properties},
+ * converts them into a binary metrics array, builds a JSON request body,
+ * and sends the request to the IA-Cloud Prediction API.</p>
+ *
+ * <p>It also supports an optional {@code allowed_algorithms} parameter.
+ * When activated in the configuration file, the request is limited to a
+ * specific list of load balancing algorithms selected by the user.</p>
+ *
+ * Example configuration:
+ *
+ * <pre>
+ * api=https://iacloudac.ma/api/predictLb
+ * api_key=pk_live_xxxxxxxxx
+ *
+ * use_allowed_algorithms=yes
+ * allowed_algorithms=RoundRobin,JIQ,PALB,CARTON
+ * </pre>
+ *
  * @author Ben Halima Anouar
-* @version 1.0.0
+ * @version 1.0.0
  * @since 1.0
  */
 public class IaCloudApi {
 
-  private static HttpClient client = HttpClient.newHttpClient();
-  private static JsonObject optimizedAlgorithm = null;
+    private static final HttpClient client = HttpClient.newHttpClient();
 
-  private static String formBody = null;
-  static ConfigManager config = null;
-  private static int[] metrics;
+    private static JsonObject optimizedAlgorithm = null;
 
-  public static int[] getMetrics() {
-    return metrics;
-  }
+    private static String formBody = null;
 
-  public static void setMetrics(int[] metrics) {
-    IaCloudApi.metrics = metrics;
-  }
+    private static ConfigManager config = null;
 
-  private static final int metricCount = 9;
-  private static int AUTO = 0;
+    private static int[] metrics;
 
-  public static void adjustMetrics(int pos) {
+    private static final int metricCount = 9;
 
-    if (metrics[pos] == 0) {
-      metrics[pos] = 1;
-    } else {
-      metrics[pos] = 0;
+    private static int AUTO = 0;
+
+    /**
+     * Returns the current QoS metrics array.
+     *
+     * @return current metrics array
+     */
+    public static int[] getMetrics() {
+        return metrics;
     }
-  }
 
-  public static JsonObject getOptimizedAlgorithm() {
-    return optimizedAlgorithm;
-  }
+    /**
+     * Updates the current QoS metrics array.
+     *
+     * @param metrics new metrics array
+     */
+    public static void setMetrics(int[] metrics) {
+        IaCloudApi.metrics = metrics;
+    }
 
-  public static int getOptimizedAlgorithmAsNumber() {
+    /**
+     * Returns the last optimized algorithm response.
+     *
+     * @return IA-Cloud API response
+     */
+    public static JsonObject getOptimizedAlgorithm() {
+        return optimizedAlgorithm;
+    }
 
-     // System.err.println("Test "+optimizedAlgorithm);
+    /**
+     * Sets the optimized algorithm response.
+     *
+     * @param optimizedAlgorithm IA-Cloud response
+     */
+    public static void setOptimizedAlgorithm(JsonObject optimizedAlgorithm) {
+        IaCloudApi.optimizedAlgorithm = optimizedAlgorithm;
+    }
 
-    String policy = optimizedAlgorithm.get("result").getAsString();
-    /*
-    switch (policy) {
-      case "DynamicRR":
-        return LoadBalancingPolicy.DYNAMIC_ROUND_ROBIN;
-      case "RR":
-        return LoadBalancingPolicy.ROUND_ROBIN;
-      case "HoneyBeeForaging":
-        return LoadBalancingPolicy.HONEYBEE;
-      case "PALB":
-        return LoadBalancingPolicy.PALB;
-      case "AntColony":
-        return LoadBalancingPolicy.ANT_COLONY;
-      case "WRR":
-        return LoadBalancingPolicy.W_ROUND_ROBIN;
-      case "Min-Min":
-        return LoadBalancingPolicy.MIN_MIN;
-      case "Max-Min":
-        return LoadBalancingPolicy.MAX_MIN;
-      case "JoinIdleQueue":
-        return LoadBalancingPolicy.JOIN_IDLE_QUEUE;
-      case "ActiveClustering":
-        return LoadBalancingPolicy.ACTIVE_CLUSTERING;
+    /**
+     * Toggles a metric value between 0 and 1.
+     *
+     * <p>This method is used by the adaptive broker when runtime
+     * thresholds are violated.</p>
+     *
+     * @param pos metric position
+     */
+    public static void adjustMetrics(int pos) {
 
-      default:
-        return 0;
-    }*/
-return 0;
-  }
-
-  public static void setOptimizedAlgorithm(JsonObject optimizedAlgorithm) {
-    IaCloudApi.optimizedAlgorithm = optimizedAlgorithm;
-  }
-
-  public static String getValue(String value) {
-
-    return config.getString(value).trim().toLowerCase();
-  }
-
-  public static void fromPropretiesToMetrics(Map<String, String> metricsMap) {
-
-    String metricsenum[] = {
-      "Performance",
-      "Throughtput",
-      "Overhead",
-      "Tolerant",
-      "MigrationTime",
-      "ResponseTime",
-      "RessourceUtilization",
-      "Scalability",
-      "PowerSaving"
-    };
-
-    for (int i = 0; i < metricsenum.length; i++) {
-      String valueMetric = getValue(metricsenum[i]);
-      // System.out.println(i+"valueMetric "+ valueMetric);
-
-      if (i < metricCount) {
-        if (valueMetric.equals("yes")) {
-          metrics[i] = 1;
-        } else {
-          metrics[i] = 0;
+        if (metrics == null) {
+            throw new IllegalStateException("Metrics are not initialized.");
         }
-      }
-    }
-  }
 
-  public static boolean ifMetricsChanged(int[] Newmetrics) {
-    var changed = false;
-    if (metrics == null || Newmetrics == null) {
-      return false;
-    }
-    if (metrics.length != Newmetrics.length) {
-      return true;
+        if (pos < 0 || pos >= metrics.length) {
+            throw new IllegalArgumentException("Invalid metric position: " + pos);
+        }
+
+        metrics[pos] = metrics[pos] == 0 ? 1 : 0;
     }
 
-    for (int i = 0; i < metrics.length; i++) {
-      if (metrics[i] != Newmetrics[i]) {
-        changed = true;
-        break;
-      }
-    }
-    return changed;
-  }
-
-  private static void loadPropreties() throws IOException {
-
-    config = new ConfigManager("config.properties");
-    Map<String, String> metricsMap = new LinkedHashMap<>(); // keep insertion order
-    LoadBalancingPolicy.API = config.getString("api").trim();
-    LoadBalancingPolicy.API_KEY = config.getString("api_key").trim();
-    metrics = new int[metricCount];
-    System.out.println("=======================Load file config ==============================");
-    config.printAll();
-    System.out.println("=======================------------------==============================");
-
-    for (String key : config.getAllKeys()) {
-
-      String value = config.getString(key).trim().toLowerCase();
-
-      metricsMap.put(key, value);
+    /**
+     * Reads a string value from the configuration file.
+     *
+     * @param value property name
+     * @return normalized property value
+     */
+    public static String getValue(String value) {
+        return config.getString(value).trim().toLowerCase();
     }
 
-    fromPropretiesToMetrics(metricsMap);
+    /**
+     * Converts QoS properties from config file to binary metrics.
+     *
+     * <p>Each QoS value is converted as follows:</p>
+     *
+     * <ul>
+     *   <li>{@code yes} becomes {@code 1}</li>
+     *   <li>{@code no} becomes {@code 0}</li>
+     * </ul>
+     *
+     * @param metricsMap map of configuration properties
+     */
+    public static void fromPropretiesToMetrics(Map<String, String> metricsMap) {
 
-    // System.out.println("------------------------"+ Arrays.toString(metrics));
-  }
+        String[] metricsEnum = {
+                "Performance",
+                "Throughtput",
+                "Overhead",
+                "Tolerant",
+                "MigrationTime",
+                "ResponseTime",
+                "RessourceUtilization",
+                "Scalability",
+                "PowerSaving"
+        };
 
-  public static void init() throws IOException {
+        for (int i = 0; i < metricsEnum.length; i++) {
 
-    if (IaCloudApi.AUTO == 0) {
-      loadPropreties();
+            String valueMetric = getValue(metricsEnum[i]);
+
+            if (i < metricCount) {
+                metrics[i] = valueMetric.equals("yes") ? 1 : 0;
+            }
+        }
     }
 
-    IaCloudApi.AUTO++;
+    /**
+     * Checks if the metrics array has changed.
+     *
+     * @param newMetrics previous metrics array
+     * @return true if metrics changed
+     */
+    public static boolean ifMetricsChanged(int[] newMetrics) {
 
-    formBody = "{\"array_param\":" + Arrays.toString(metrics) + "}";
+        if (metrics == null || newMetrics == null) {
+            return false;
+        }
 
-    // System.out.println("Auto"+ IaCloudApi.AUTO +"From bOdy "+formBody);
-    connect();
-  }
+        if (metrics.length != newMetrics.length) {
+            return true;
+        }
 
-  private static JsonObject connect() throws IOException {
-    HttpRequest request = null;
-    optimizedAlgorithm = null;
-    request =
-        HttpRequest.newBuilder()
-            .uri(URI.create(LoadBalancingPolicy.API))
-            .header("Content-Type", "application/json")
-            .header("Accept", "application/json")
-            .header("X-API-Key", LoadBalancingPolicy.API_KEY)
-            .POST(HttpRequest.BodyPublishers.ofString(formBody))
-            .build(); // Logger.getLogger(IaCloudApi.class.getName()).log(Level.SEVERE, null, ex);
-    HttpResponse<String> response;
+        for (int i = 0; i < metrics.length; i++) {
+            if (metrics[i] != newMetrics[i]) {
+                return true;
+            }
+        }
 
-    try {
-      response = client.send(request, HttpResponse.BodyHandlers.ofString());
-      // System.out.println("Title: " + response.body());
-      optimizedAlgorithm = JsonParser.parseString(response.body()).getAsJsonObject();
+        return false;
+    }
 
-      if (optimizedAlgorithm.get("success").equals("false")){
 
-          System.err.println("Error "+optimizedAlgorithm);
+/**
+ * Returns the correct API endpoint depending on the prediction mode.
+ *
+ * <p>If allowed algorithms mode is enabled, the customized prediction
+ * endpoint is used. Otherwise, the standard prediction endpoint is used.</p>
+ *
+ * @return selected API endpoint
+ */
+private static String getSelectedEndpoint() {
 
+    if (isAllowedAlgorithmsEnabled()) {
+
+        if (LoadBalancingPolicy.CUSTOMIZED_API == null
+                || LoadBalancingPolicy.CUSTOMIZED_API.isBlank()) {
+
+            throw new IllegalStateException(
+                    "customized_api is required when use_allowed_algorithms=yes"
+            );
+        }
+
+        return LoadBalancingPolicy.CUSTOMIZED_API;
+    }
+
+    return LoadBalancingPolicy.API;
 }
-      /*
-      System.out.println("Title: " + jsonObject.get("title").getAsString());
-      System.out.println("Status code: " + response.statusCode());
-      System.out.println("Response body:\n" + response.body());
-       */
 
-    } catch (InterruptedException ex) {
-      // Logger.getLogger(IaCloudApi.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-      ex.printStackTrace();
-      System.err.println(ex);
+    /**
+     * Loads configuration from {@code config.properties}.
+     *
+     * @throws IOException if configuration file cannot be loaded
+     */
+    private static void loadPropreties() throws IOException {
+
+        config = new ConfigManager("config.properties");
+
+        Map<String, String> metricsMap = new LinkedHashMap<>();
+
+        LoadBalancingPolicy.API =
+        config.getString("api").trim();
+
+        LoadBalancingPolicy.CUSTOMIZED_API =
+        config.getString("customized_api", "").trim();
+
+        LoadBalancingPolicy.API_KEY =
+        config.getString("api_key").trim();
+
+        metrics = new int[metricCount];
+
+        System.out.println("======================= Load file config ==============================");
+        config.printAll();
+        System.out.println("======================= ---------------- ==============================");
+
+        for (String key : config.getAllKeys()) {
+
+            String value = config.getString(key).trim().toLowerCase();
+
+            metricsMap.put(key, value);
+        }
+
+        fromPropretiesToMetrics(metricsMap);
     }
-    return optimizedAlgorithm;
-  }
+
+    /**
+     * Initializes IA-Cloud API communication.
+     *
+     * <p>During the first call, the configuration file is loaded.
+     * Then the JSON request body is built and sent to the IA-Cloud API.</p>
+     *
+     * @throws IOException if configuration or HTTP request fails
+     */
+    public static void init() throws IOException {
+
+        if (IaCloudApi.AUTO == 0) {
+            loadPropreties();
+        }
+
+        IaCloudApi.AUTO++;
+
+        formBody = buildRequestBody();
+
+
+        System.out.println("IA-Cloud endpoint: " + getSelectedEndpoint());
+        System.out.println("IA-Cloud request body: " + formBody);
+
+        connect();
+    }
+
+    /**
+     * Builds the JSON request body.
+     *
+     * <p>If {@code use_allowed_algorithms=yes}, the request body includes
+     * the {@code allowed_algorithms} array. Otherwise, only
+     * {@code array_param} is sent.</p>
+     *
+     * @return JSON request body
+     */
+   private static String buildRequestBody() {
+
+    JsonObject body = new JsonObject();
+
+    JsonArray arrayParam = new JsonArray();
+
+    for (int metric : metrics) {
+        arrayParam.add(metric);
+    }
+
+    body.add("array_param", arrayParam);
+
+    if (isAllowedAlgorithmsEnabled()) {
+
+        JsonArray allowedAlgorithms = getAllowedAlgorithmsFromConfig();
+
+        if (allowedAlgorithms.isEmpty()) {
+            throw new IllegalStateException(
+                    "use_allowed_algorithms=yes but allowed_algorithms is empty."
+            );
+        }
+
+        body.add("allowed_algorithms", allowedAlgorithms);
+    }
+
+    return body.toString();
+}
+
+    /**
+     * Checks whether allowed algorithms mode is enabled.
+     *
+     * <p>Accepted true values are: {@code yes}, {@code true}, and {@code 1}.</p>
+     *
+     * @return true if allowed algorithms mode is enabled
+     */
+    private static boolean isAllowedAlgorithmsEnabled() {
+
+        String value = config.getString(
+                "use_allowed_algorithms",
+                "no"
+        ).trim().toLowerCase();
+
+        return value.equals("yes")
+                || value.equals("true")
+                || value.equals("1");
+    }
+
+    /**
+     * Reads allowed algorithms from the configuration file.
+     *
+     * <p>The expected format is:</p>
+     *
+     * <pre>
+     * allowed_algorithms=RoundRobin,JIQ,PALB,CARTON
+     * </pre>
+     *
+     * @return JSON array of allowed algorithms
+     */
+    private static JsonArray getAllowedAlgorithmsFromConfig() {
+
+        JsonArray allowedAlgorithms = new JsonArray();
+
+        String value = config.getString(
+                "allowed_algorithms",
+                ""
+        ).trim();
+
+        if (value.isBlank()) {
+            return allowedAlgorithms;
+        }
+
+        String[] algorithms = value.split(",");
+
+        for (String algorithm : algorithms) {
+
+            String cleanAlgorithm = algorithm.trim();
+
+            if (!cleanAlgorithm.isBlank()) {
+                allowedAlgorithms.add(cleanAlgorithm);
+            }
+        }
+
+        return allowedAlgorithms;
+    }
+
+    /**
+     * Sends the HTTP POST request to the IA-Cloud Prediction API.
+     *
+     * @return IA-Cloud JSON response
+     * @throws IOException if the HTTP request fails
+     */
+    private static JsonObject connect() throws IOException {
+
+        optimizedAlgorithm = null;
+
+        HttpRequest request =
+        HttpRequest.newBuilder()
+                .uri(URI.create(getSelectedEndpoint()))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .header("X-API-Key", LoadBalancingPolicy.API_KEY)
+                .POST(HttpRequest.BodyPublishers.ofString(formBody))
+                .build();
+
+        try {
+
+            HttpResponse<String> response =
+                    client.send(
+                            request,
+                            HttpResponse.BodyHandlers.ofString()
+                    );
+
+            optimizedAlgorithm =
+                    JsonParser.parseString(response.body()).getAsJsonObject();
+
+            if (!optimizedAlgorithm.has("success")) {
+                System.err.println("Invalid IA-Cloud response: " + optimizedAlgorithm);
+                return optimizedAlgorithm;
+            }
+
+            if (!optimizedAlgorithm.get("success").getAsBoolean()) {
+                System.err.println("IA-Cloud error: " + optimizedAlgorithm);
+            }
+
+        } catch (InterruptedException ex) {
+
+            Thread.currentThread().interrupt();
+
+            System.err.println("IA-Cloud request interrupted: " + ex.getMessage());
+        }
+
+        return optimizedAlgorithm;
+    }
 }
